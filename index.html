@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Dashboard Pro</title>
+    <title>Weather Pro Dashboard</title>
     
     <link rel="stylesheet" href="style.css">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,125 +14,133 @@
             theme: {
                 fontFamily: { sans: ['Inter', 'sans-serif'] },
                 extend: {
-                    colors: { primary: '#0ea5e9' }
+                    colors: {
+                        primary: '#0ea5e9',
+                    }
                 }
             }
         }
     </script>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="h-screen w-full bg-slate-200 dark:bg-slate-900 flex items-center justify-center p-4 transition-colors duration-300">
+<body class="h-screen flex items-center justify-center p-4 md:p-8 bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
 
-    <div class="bg-white dark:bg-slate-800 w-full h-full max-w-[1600px] max-h-[900px] rounded-3xl shadow-2xl flex overflow-hidden border border-slate-300 dark:border-slate-700">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-6xl h-[90vh] md:h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-slate-200 dark:border-slate-700 transition-colors duration-300">
         
-        <div class="w-[350px] bg-slate-50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700 flex flex-col p-6 shrink-0">
+        <div class="w-full md:w-80 bg-slate-50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700 p-6 flex flex-col gap-6">
             
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center text-lg shadow-lg shadow-blue-500/30">
-                    <i class="fa-solid fa-cloud-bolt"></i>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-primary font-bold text-xl">
+                    <div class="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-cloud"></i>
+                    </div>
+                    WeatherPro
                 </div>
-                <h1 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Weather<span class="text-primary">Dash</span></h1>
+                <button id="theme-toggle" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-yellow-400 hover:scale-110 transition">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
             </div>
 
-            <div class="relative group mb-6">
-                <input type="text" id="city-input" placeholder="Search city..." autocomplete="off"
-                    class="w-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl py-4 pl-12 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition shadow-sm font-medium text-slate-700 dark:text-white">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                <ul id="suggestions" class="absolute top-full left-0 right-0 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl mt-2 shadow-xl z-50 overflow-hidden hidden"></ul>
+            <div class="relative group">
+                <input type="text" id="city-input" placeholder="Cari Kota..." autocomplete="off"
+                    class="w-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition shadow-sm text-slate-700 dark:text-white z-20 relative">
+                
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs z-30 pointer-events-none"></i>
+                
+                <ul id="suggestions" class="absolute top-full left-0 right-0 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl mt-2 shadow-lg z-50 overflow-hidden hidden">
+                </ul>
             </div>
 
-            <div class="flex-1 flex flex-col overflow-hidden">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-1">Favorite Cities</h3>
-                <div id="fav-list" class="flex-1 overflow-y-auto pr-2 space-y-3 no-scrollbar">
+            <div class="flex-1 overflow-y-auto no-scrollbar">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Favorites</h3>
+                <div id="fav-list" class="space-y-2">
                     </div>
             </div>
 
-            <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 gap-3">
-                <button id="theme-toggle" class="flex items-center justify-center gap-2 py-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition text-sm font-semibold text-slate-600 dark:text-slate-200">
-                    <i class="fa-solid fa-moon"></i> Theme
-                </button>
-                <div class="flex bg-slate-200 dark:bg-slate-900 p-1 rounded-xl">
-                    <button id="btn-c" class="flex-1 rounded-lg text-sm font-bold shadow-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-white">°C</button>
-                    <button id="btn-f" class="flex-1 rounded-lg text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700">°F</button>
-                </div>
+            <div class="bg-white dark:bg-slate-700 p-1 rounded-xl border border-slate-200 dark:border-slate-600 flex shadow-sm">
+                <button id="btn-c" class="flex-1 py-2 rounded-lg text-sm font-semibold bg-primary text-white shadow-sm transition">°C</button>
+                <button id="btn-f" class="flex-1 py-2 rounded-lg text-sm font-semibold text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 transition">°F</button>
             </div>
         </div>
 
-        <div class="flex-1 bg-white dark:bg-slate-800 p-8 md:p-12 overflow-y-auto flex flex-col relative">
+        <div class="flex-1 p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-800 flex flex-col text-slate-700 dark:text-slate-100">
             
-            <div class="flex justify-between items-start mb-10">
+            <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h2 id="city-name" class="text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-2">-</h2>
-                    <p id="date-time" class="text-slate-500 dark:text-slate-400 text-lg font-medium">-</p>
+                    <h1 id="city-name" class="text-3xl font-bold">-</h1>
+                    <p id="date-time" class="text-slate-400 text-sm mt-1">-</p>
                 </div>
-                <div class="flex gap-3">
-                    <button id="refresh-btn" class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-primary hover:text-white dark:hover:bg-primary transition flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm group">
-                        <i class="fa-solid fa-rotate-right group-hover:rotate-180 transition duration-500"></i>
-                    </button>
-                    <button id="save-btn" class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-yellow-400 hover:text-white transition flex items-center justify-center text-slate-400 shadow-sm">
-                        <i class="fa-regular fa-star text-xl"></i>
-                    </button>
-                </div>
+                <button id="save-btn" class="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 hover:text-yellow-400 hover:border-yellow-400 transition" title="Add to Favorites">
+                    <i class="fa-regular fa-star"></i>
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-                
-                <div class="lg:col-span-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[250px]">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                    
-                    <div class="flex justify-between items-center relative z-10">
-                        <div>
-                            <div class="flex items-start">
-                                <span id="main-temp" class="text-8xl font-bold tracking-tighter">0</span>
-                                <span class="text-4xl mt-4 font-light opacity-80">°</span>
-                            </div>
-                            <p id="main-desc" class="text-2xl font-medium capitalize mt-2 opacity-90">-</p>
-                        </div>
-                        <img id="main-icon" src="" class="w-40 h-40 drop-shadow-2xl">
-                    </div>
-
-                    <div class="flex gap-8 mt-6 relative z-10 text-blue-100">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-wind opacity-60"></i>
-                            <span id="val-wind" class="font-semibold">-</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-droplet opacity-60"></i>
-                            <span id="val-humid" class="font-semibold">-</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="fa-regular fa-eye opacity-60"></i>
-                            <span id="val-vis" class="font-semibold">-</span>
-                        </div>
+            <div class="flex flex-col md:flex-row items-center gap-8 mb-10">
+                <div class="relative">
+                    <div class="w-40 h-40 bg-blue-50 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                        <img id="main-icon" src="" alt="weather" class="w-32 h-32 drop-shadow-md">
                     </div>
                 </div>
+                <div class="text-center md:text-left">
+                    <div class="flex items-start justify-center md:justify-start">
+                        <span id="main-temp" class="text-7xl font-bold tracking-tight">-</span>
+                        <span class="text-2xl text-slate-400 mt-2 font-light">°</span>
+                    </div>
+                    <p id="main-desc" class="text-xl text-primary font-medium capitalize mt-1">-</p>
+                </div>
+                
+                <div class="hidden md:block w-px h-24 bg-slate-200 dark:bg-slate-700 mx-4"></div>
 
-                <div class="grid grid-rows-2 gap-4">
-                    <div class="bg-slate-50 dark:bg-slate-700/50 rounded-3xl p-6 flex items-center gap-4 border border-slate-100 dark:border-slate-700">
-                        <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-xl">
+                <div class="grid grid-cols-2 gap-x-8 gap-y-4 w-full md:w-auto">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-blue-500">
+                            <i class="fa-solid fa-droplet"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Humidity</p>
+                            <p id="val-humid" class="font-bold">-</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-cyan-500">
+                            <i class="fa-solid fa-wind"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Wind</p>
+                            <p id="val-wind" class="font-bold">-</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-orange-500">
                             <i class="fa-solid fa-temperature-arrow-up"></i>
                         </div>
                         <div>
-                            <p class="text-sm text-slate-400">Max Temp</p>
-                            <p id="val-max" class="text-2xl font-bold text-slate-700 dark:text-white">-</p>
+                            <p class="text-xs text-slate-400">Max Temp</p>
+                            <p id="val-max" class="font-bold">-</p>
                         </div>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-700/50 rounded-3xl p-6 flex items-center gap-4 border border-slate-100 dark:border-slate-700">
-                        <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-calendar-day"></i>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-purple-500">
+                            <i class="fa-regular fa-eye"></i>
                         </div>
                         <div>
-                            <p class="text-sm text-slate-400">Condition</p>
-                            <p class="text-lg font-bold text-slate-700 dark:text-white capitalize">Good Day</p>
+                            <p class="text-xs text-slate-400">Visibility</p>
+                            <p id="val-vis" class="font-bold">-</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex-1 flex flex-col">
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-6">5-Day Forecast</h3>
-                <div id="forecast-grid" class="grid grid-cols-5 gap-4 h-full">
+            <div class="flex-1">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">5-Day Forecast</h3>
+                    <button id="refresh-btn" class="text-sm text-primary hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh
+                    </button>
+                </div>
+                <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     </div>
             </div>
 
