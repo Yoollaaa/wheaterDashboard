@@ -1,0 +1,60 @@
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;  
+    scrollbar-width: none;  
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+#suggestions li {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #334155; 
+    border-bottom: 1px solid #f1f5f9;
+}
+
+#suggestions li:hover {
+    background-color: #f0f9ff; 
+    color: #0ea5e9; 
+}
+
+.dark #suggestions li {
+    color: #e2e8f0;
+    border-bottom: 1px solid #334155;
+}
+
+.dark #suggestions li:hover {
+    background-color: #1e293b;
+}
+
+#suggestions li:last-child {
+    border-bottom: none;
+}
