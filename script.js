@@ -4,7 +4,7 @@ const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 let city = 'Jakarta';
 let unit = 'metric'; 
 let isDark = localStorage.getItem('theme') === 'dark';
-let searchTimeout; 
+let searchTimeout;
 
 const ui = {
     input: document.getElementById('city-input'),
@@ -32,7 +32,6 @@ window.addEventListener('DOMContentLoaded', () => {
     updateUnitUI();
     loadFavorites();
     getWeather(city);
-    
     setInterval(() => getWeather(city), 300000); 
 });
 
@@ -50,9 +49,8 @@ async function getWeather(cityName) {
         
         city = data.name; 
         checkFavoriteStatus(city);
-
     } catch (err) {
-        alert(err.message);
+        console.error(err);
     }
 }
 
@@ -64,6 +62,7 @@ function updateCurrentUI(data) {
     ui.wind.textContent = `${data.wind.speed} ${unit === 'metric' ? 'm/s' : 'mph'}`;
     ui.max.textContent = `${Math.round(data.main.temp_max)}°`;
     ui.vis.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
+    
     ui.icon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
     
     const now = new Date();
@@ -74,19 +73,52 @@ function updateCurrentUI(data) {
 
 function updateForecastUI(data) {
     ui.forecast.innerHTML = '';
-    const daily = data.list.filter(item => item.dt_txt.includes('12:00:00'));
+    
+    const dailyData = {};
+    const today = new Date().toISOString().split('T')[0];
 
-    daily.forEach(day => {
+    data.list.forEach(item => {
+        const date = item.dt_txt.split(' ')[0]; 
+        
+        if (date === today) return;
+
+        if (!dailyData[date]) {
+            dailyData[date] = {
+                dt: item.dt,
+                icon: item.weather[0].icon,
+                min: item.main.temp_min,
+                max: item.main.temp_max
+            };
+        } else {
+            dailyData[date].min = Math.min(dailyData[date].min, item.main.temp_min);
+            dailyData[date].max = Math.max(dailyData[date].max, item.main.temp_max);
+        }
+    });
+
+    const forecastList = Object.values(dailyData).slice(0, 5);
+
+    forecastList.forEach(day => {
         const d = new Date(day.dt * 1000);
-        const dayName = d.toLocaleDateString('id-ID', { weekday: 'short' });
+        const dayName = d.toLocaleDateString('id-ID', { weekday: 'long' }); 
         
         const card = document.createElement('div');
-        card.className = 'bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 p-4 rounded-2xl flex flex-col items-center text-center hover:bg-white dark:hover:bg-slate-600 hover:shadow-md transition duration-300';
+        card.className = 'bg-white/40 dark:bg-slate-800/40 backdrop-blur-md border border-white/30 dark:border-slate-700/30 p-2 rounded-2xl flex flex-col items-center text-center text-sm shadow-sm transition hover:-translate-y-1';
+        
         card.innerHTML = `
-            <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">${dayName}</p>
-            <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png" class="w-10 h-10 mb-1">
-            <p class="text-xl font-bold text-slate-800 dark:text-white">${Math.round(day.main.temp)}°</p>
-            <p class="text-xs text-slate-400 capitalize">${day.weather[0].description}</p>
+            <p class="font-bold text-slate-700 dark:text-slate-300 text-[10px] md:text-xs uppercase tracking-wide mb-1">${dayName}</p>
+            <img src="https://openweathermap.org/img/wn/${day.icon}.png" class="w-8 h-8 drop-shadow-sm mb-1">
+            
+            <div class="flex items-center gap-2 w-full justify-center">
+                <div class="flex flex-col items-center leading-none">
+                    <span class="text-[8px] text-slate-500 dark:text-slate-400">Max</span>
+                    <span class="font-extrabold text-rose-500 text-xs md:text-sm">↑${Math.round(day.max)}°</span>
+                </div>
+                <div class="w-px h-6 bg-slate-300 dark:bg-slate-600"></div>
+                <div class="flex flex-col items-center leading-none">
+                    <span class="text-[8px] text-slate-500 dark:text-slate-400">Min</span>
+                    <span class="font-extrabold text-cyan-500 text-xs md:text-sm">↓${Math.round(day.min)}°</span>
+                </div>
+            </div>
         `;
         ui.forecast.appendChild(card);
     });
@@ -95,12 +127,10 @@ function updateForecastUI(data) {
 ui.input.addEventListener('input', function() {
     const query = this.value.trim();
     clearTimeout(searchTimeout);
-
     if (query.length < 3) {
         ui.suggestions.classList.add('hidden');
         return;
     }
-
     searchTimeout = setTimeout(() => fetchSuggestions(query), 300);
 });
 
@@ -120,12 +150,10 @@ function renderSuggestions(cities) {
         ui.suggestions.classList.add('hidden');
         return;
     }
-
     cities.forEach(c => {
         const li = document.createElement('li');
         li.textContent = `${c.name}, ${c.state ? c.state + ',' : ''} ${c.country}`;
-        li.className = "px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer text-sm text-slate-700 dark:text-slate-200 border-b border-slate-100 dark:border-slate-600 last:border-0";
-        
+        li.className = "px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-sm text-slate-700 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700 last:border-0";
         li.addEventListener('click', () => {
             ui.input.value = c.name;
             getWeather(c.name);
@@ -152,32 +180,25 @@ ui.input.addEventListener('keypress', (e) => {
 function loadFavorites() {
     const favs = JSON.parse(localStorage.getItem('weatherFavs') || '[]');
     ui.favList.innerHTML = '';
-    
-    if (favs.length === 0) {
-        ui.favList.innerHTML = '<div class="text-xs text-slate-400 italic">Belum ada favorit.</div>';
-        return;
-    }
+    if (favs.length === 0) return;
 
     favs.forEach(c => {
-        const item = document.createElement('div');
-        item.className = 'flex justify-between items-center bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 p-3 rounded-xl shadow-sm cursor-pointer hover:border-primary transition group';
-        item.innerHTML = `
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-200">${c}</span>
-            <button onclick="removeFavorite(event, '${c}')" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-        `;
-        item.onclick = (e) => {
-            if(e.target.tagName !== 'BUTTON' && e.target.tagName !== 'I') getWeather(c);
+        const btn = document.createElement('button');
+        btn.className = "px-3 py-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-600 rounded-lg text-xs hover:bg-white dark:hover:bg-slate-700 transition flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium shadow-sm";
+        btn.innerHTML = `${c} <span class="text-red-400 hover:text-red-600 font-bold px-1" onclick="removeFavorite(event, '${c}')">&times;</span>`;
+        btn.onclick = (e) => {
+            if(e.target.tagName !== 'SPAN') getWeather(c);
         };
-        ui.favList.appendChild(item);
+        ui.favList.appendChild(btn);
     });
 }
 
 ui.saveBtn.addEventListener('click', () => {
     let favs = JSON.parse(localStorage.getItem('weatherFavs') || '[]');
     if (favs.includes(city)) {
-        favs = favs.filter(c => c !== city); 
+        favs = favs.filter(c => c !== city);
     } else {
-        favs.push(city); 
+        favs.push(city);
     }
     localStorage.setItem('weatherFavs', JSON.stringify(favs));
     loadFavorites();
@@ -196,12 +217,14 @@ window.removeFavorite = (e, c) => {
 function checkFavoriteStatus(c) {
     const favs = JSON.parse(localStorage.getItem('weatherFavs') || '[]');
     const icon = ui.saveBtn.querySelector('i');
-    if (favs.includes(c)) {
-        ui.saveBtn.classList.add('text-yellow-400', 'border-yellow-400');
-        icon.classList.replace('fa-regular', 'fa-solid');
-    } else {
-        ui.saveBtn.classList.remove('text-yellow-400', 'border-yellow-400');
-        icon.classList.replace('fa-solid', 'fa-regular');
+    if(icon) {
+        if (favs.includes(c)) {
+            ui.saveBtn.classList.add('text-yellow-500');
+            icon.classList.replace('fa-regular', 'fa-solid');
+        } else {
+            ui.saveBtn.classList.remove('text-yellow-500');
+            icon.classList.replace('fa-solid', 'fa-regular');
+        }
     }
 }
 
@@ -217,15 +240,19 @@ function setUnit(newUnit) {
 }
 
 function updateUnitUI() {
-    const activeClass = "bg-primary text-white shadow-sm";
-    const inactiveClass = "text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600";
-    
+    const activeClass = "bg-indigo-600 text-white shadow-md scale-105";
+    const inactiveClass = "text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white";
+
+    // Reset Class
+    ui.btnC.className = `px-5 rounded-lg text-sm font-extrabold transition-all duration-300`;
+    ui.btnF.className = `px-5 rounded-lg text-sm font-extrabold transition-all duration-300`;
+
     if (unit === 'metric') {
-        ui.btnC.className = `flex-1 py-2 rounded-lg text-sm font-semibold transition ${activeClass}`;
-        ui.btnF.className = `flex-1 py-2 rounded-lg text-sm font-semibold transition ${inactiveClass}`;
+        ui.btnC.classList.add(...activeClass.split(" "));
+        ui.btnF.classList.add(...inactiveClass.split(" "));
     } else {
-        ui.btnC.className = `flex-1 py-2 rounded-lg text-sm font-semibold transition ${inactiveClass}`;
-        ui.btnF.className = `flex-1 py-2 rounded-lg text-sm font-semibold transition ${activeClass}`;
+        ui.btnC.classList.add(...inactiveClass.split(" "));
+        ui.btnF.classList.add(...activeClass.split(" "));
     }
 }
 
