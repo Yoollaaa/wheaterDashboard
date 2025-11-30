@@ -32,7 +32,7 @@ Simpan kota yang sering dipantau ke dalam daftar Favorit. Data tersimpan permane
 ![Fahrenheit](ss/farenheit.png)
 
 ### 5. 📅 Ramalan Cuaca (Forecast) Akurat
-Menampilkan prediksi cuaca untuk 5 hari ke depan (Senin-Jumat) dengan kalkulasi suhu Minimum (Min) dan Maksimum (Max harian.
+Menampilkan prediksi cuaca untuk 5 hari ke depan (Senin-Jumat) dengan kalkulasi suhu Minimum (Min) dan Maksimum (Max harian).
 
 ![Prediksi](ss/prediksi.png)
 ---
